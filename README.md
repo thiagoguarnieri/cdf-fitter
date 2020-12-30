@@ -6,7 +6,7 @@ It receives a CSV dataset with continuous and discrete data and find the paramet
 
 <ul>
   <li>Kolmogorov-Smirnov and Anderson-Darling adherence tests</li>
-  <li> RMSE error measurement forthe entire curve and Weighted between curve body and tail</li>
+  <li> RMSE error measurement for the entire curve and Weighted between curve body and tail</li>
 </ul>
  
 Examples to run are provided in the documentation
