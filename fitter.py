@@ -1,16 +1,6 @@
-#https://docs.scipy.org/doc/scipy/reference/stats.html
-#https://stackoverflow.com/questions/6620471/fitting-empirical-distribution-to-theoretical-ones-with-scipy-python
-#https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.rv_continuous.fit.html#scipy.stats.rv_continuous.fit
-
-# testes de pertinencia a uma distribuicao
-# Anderson-darling (para cauda) https://en.wikipedia.org/wiki/Anderson%E2%80%93Darling_test
-# kolmogorov-smirnoff (para corpo)
-
-# testes de goodness 
-# Kullback-Leibler Divergence (KLD) https://www.rdocumentation.org/packages/LaplacesDemon/versions/16.1.1/topics/KLD
-# RMSE, MSE...
-
+#libraries
 import matplotlib
+#allow generation of figures in OS which does not have graphical interface
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
@@ -24,7 +14,7 @@ import sys
 import random
 import math
 
-#1/n * sum(yp - y)^2
+#root mean squared error
 def rmse(emp,fitted, minval, maxval):
 	value = 0
 	for idx in range(minval,maxval): 
@@ -32,7 +22,7 @@ def rmse(emp,fitted, minval, maxval):
 	value = value / len(emp)
 	return math.sqrt(value)
 #-------------------------------------------------------------------------------
-#gera a cdf dos dados inseridos em csv
+#Generate CDF for fitting
 def ecdf(sample):
 
     # convert sample to a numpy array, if it isn't already
@@ -47,7 +37,9 @@ def ecdf(sample):
 
     return quantiles, cumprob
 
-#goodness of fit
+#display goodness of fit
+#root mean squared error 
+#Kolmogorov-smirnov: lower values is better. p-value must be under 0.05
 def errores(arr1,arr2,dst_name,pop_size):
 	emp_d = np.asarray(arr1)
 	theo_d = np.asarray(arr2)
@@ -56,27 +48,25 @@ def errores(arr1,arr2,dst_name,pop_size):
 	quantils = np.arange(0.01,1.01,0.01)
 	
 	#sample of distributions
-	#the size of sample depends on the population. You must look the shape of the curve to decide. For example: bad fit must not have a better goodness than a good fit.
-	smp_emp = np.random.choice(emp_d,100,replace = False)
-	smp_theo = np.random.choice(theo_d,100,replace = False)
+	#if you experience low p-values, try to change the samples size (second parameter)
+	smp_emp = np.random.choice(emp_d,20,replace = False)
+	smp_theo = np.random.choice(theo_d,20,replace = False)
 	
-	#gerando quantis
+	#generating percentiles
 	quant_emp = scipy.stats.mstats.mquantiles(emp_d,  prob = quantils)
 	quant_theo = scipy.stats.mstats.mquantiles(theo_d,  prob = quantils)
 	
-	#o gerador costuma gerar valores muito acima dos empiricos. 
-	#por isso o MSE reportado pode ser muito alto apesar de a curva 
-	#parecer visualmente boa. 
 	kst = scipy.stats.ks_2samp(smp_emp,smp_theo)
+	#The MSE has a problem: Errors in curve tail can increase error size
 	mserr = rmse(quant_emp,quant_theo,0,99)
 	mserr95 = rmse(quant_emp,quant_theo,0,93)
 	mserrTail = rmse(quant_emp,quant_theo,94,99)
 	
 	txt_err = "\nKS statistic = " + str(kst[0]) + "\np-value = " + str(kst[1]) + "\n"
-	txt_err = txt_err + "[RMSE body (95%)] = " + str(round(mserr95,2)) + "\n"
-	txt_err = txt_err + "[RMSE tail (5%)] = " + str(round(mserrTail,2)) + "\n"
-	txt_err = txt_err + "[RMSE all] = " + str(round(mserr,2)) + "\n"
-	txt_err = txt_err + "[Weigh avg RMSE] = " + str(round((mserr95 * 0.95) + (mserrTail * 0.05),2))
+	txt_err = txt_err + "[RMSE body (95%)] = " + str(round(mserr95,4)) + "\n"
+	txt_err = txt_err + "[RMSE tail (5%)] = " + str(round(mserrTail,4)) + "\n"
+	txt_err = txt_err + "[RMSE all] = " + str(round(mserr,4)) + "\n"
+	txt_err = txt_err + "[RMSE weighted] = " + str(round((mserr95 * 0.95) + (mserrTail * 0.05),2))
 	return(txt_err)
 
 #preprocess
@@ -86,67 +76,79 @@ def errores(arr1,arr2,dst_name,pop_size):
 np.random.seed(12343)
 random.seed(12343)
 
-#csv com os dados
+#CSV with data
 inputcsv = sys.argv[1]
-#pasta onde serao salvas a cdf, a imagem e os parametros
+#folder where output will be stored
 outputfolder = sys.argv[2]
 #indico manualmente a feature (cabecalho do csv)
 feature = sys.argv[3]
 #leitura dos dados
-my_data_df = pd.read_csv(inputcsv, header=0)
-#cria uma variavel com os valores da feature desejada (ontime, offtime...)
-y = my_data_df[feature]
+my_data = pd.read_csv(inputcsv, header=0)
+#getting the desired attribute
+y = my_data[feature]
 
 #fitting
 #-------------------------------------------------------------------------------
-#quantidade de elementos
+#getting number of elements
 tam = len(y)
 
-#indices
+#indexes
 x = scipy.arange(tam)
 
 #empirical cdf
 cdf_quant, cdf_cum = ecdf(y)
 
-#tipos de distribucao
-#dist_names = ['alpha','anglit','arcsine','argus','beta','betaprime','bradford','burr','burr12','cauchy','chi','chi2','cosine','crystalball','dgamma','dweibull','erlang','expon','exponnorm','exponweib','exponpow','f','fatiguelife','fisk','foldcauchy','foldnorm','frechet_r','frechet_l','genlogistic','gennorm','genpareto','genexpon','genextreme','gausshyper','gamma','gengamma','genhalflogistic','gilbrat','gompertz','gumbel_r','gumbel_l','halfcauchy','halflogistic','halfnorm','halfgennorm','hypsecant','invgamma','invgauss','invweibull','johnsonsb','johnsonsu','kappa4','kappa3','ksone','kstwobign','laplace','levy','levy_l','levy_stable','logistic','loggamma','loglaplace','lognorm','lomax','maxwell','mielke','moyal','nakagami','ncx2','ncf','nct','norm','norminvgauss','pareto','pearson3','powerlaw','powerlognorm','powernorm','rdist','reciprocal','rayleigh','rice','recipinvgauss','semicircular','skewnorm','t','trapz','triang','truncexpon','truncnorm','tukeylambda','uniform','vonmises','vonmises_line','wald','weibull_min','weibull_max','wrapcauchy'] 
-#betaprime: beta type2, lomax: pareto type2, erlang: type of gamma
+#dist_names = ['alpha','anglit','arcsine','argus','beta','betaprime','bradford','burr','burr12','cauchy','chi','chi2','cosine','crystalball','dgamma','dweibull',
+#'erlang','expon','exponnorm','exponweib','exponpow','f','fatiguelife','fisk','foldcauchy','foldnorm','frechet_r','frechet_l','genlogistic','gennorm','genpareto','genexpon',
+#'genextreme','gausshyper','gamma','gengamma','genhalflogistic','gilbrat','gompertz','gumbel_r','gumbel_l','halfcauchy','halflogistic','halfnorm','halfgennorm','hypsecant',
+#'invgamma','invgauss','invweibull','johnsonsb','johnsonsu','kappa4','kappa3','ksone','kstwobign','laplace','levy','levy_l','levy_stable','logistic','loggamma','loglaplace',
+#'lognorm','lomax','maxwell','mielke','moyal','nakagami','ncx2','ncf','nct','norm','norminvgauss','pareto','pearson3','powerlaw','powerlognorm','powernorm','rdist','reciprocal',
+#'rayleigh','rice','recipinvgauss','semicircular','skewnorm','t','trapz','triang','truncexpon','truncnorm','tukeylambda','uniform','vonmises','vonmises_line','wald','weibull_min',
+#'weibull_max','wrapcauchy'] 
 
-dist_names = ['norm','lognorm','powerlognorm','expon','exponpow','gamma','logistic','beta','weibull_min','exponweib','pareto'] 
 
+dist_names = ['alpha','anglit','arcsine','argus','beta','betaprime','bradford','burr','burr12','cauchy','chi','chi2','cosine','crystalball','dgamma','dweibull',
+'erlang','expon','exponnorm','exponweib','exponpow','f','fatiguelife','fisk','foldcauchy','foldnorm','frechet_r','frechet_l','genlogistic','gennorm','genpareto','genexpon',
+'genextreme','gausshyper','gamma','gengamma','genhalflogistic','gilbrat','gompertz','gumbel_r','gumbel_l','halfcauchy','halflogistic','halfnorm','halfgennorm','hypsecant',
+'invgamma','invgauss','invweibull','johnsonsb','johnsonsu','kappa4','kappa3','ksone','kstwobign','laplace','levy','levy_l','logistic','loggamma','loglaplace',
+'lognorm','lomax','maxwell','mielke','moyal','nakagami','ncx2','ncf','nct','norm','norminvgauss','pareto','pearson3','powerlaw','rdist','reciprocal',
+'rayleigh','rice','recipinvgauss','semicircular','skewnorm','t','trapz','triang','truncexpon','truncnorm','tukeylambda','uniform','vonmises','vonmises_line','wald','weibull_min',
+'weibull_max'] 
+
+#testing distributions
 for dist_name in dist_names:
 	
 	print("testing dist " + dist_name)
 	
-    #pega o valor do atributo ou ponteiro para a funcao pelo seu nome em string. ex: dist = scipy.stats.norm
+    #select distribution
 	dist = getattr(scipy.stats, dist_name)
     
-    #faz o fit
+   	#fitting
 	param = dist.fit(y)
     
-    #gera cdf: loc = fator de shift, scale = fator de escala
+    #generating cdf for comparison
 	cdf_fitted = dist.cdf(x, * param[:-2], loc=param[-2], scale=param[-1])
 
-	#generating synth data
+	#generating random variates
 	synth_fitted = dist.rvs(* param[:-2], loc=param[-2], scale=param[-1], size = tam, random_state = 12343)
 
 	#goodness (body and tail)
 	rep_err = errores(y,synth_fitted,dist_name,tam)
 	
-	#gerando quantis pra imprimir cdf
+	#generating quantiles to print cdf
 	quantisCdf = scipy.stats.mstats.mquantiles(np.asarray(synth_fitted),  prob = np.arange(0,1,0.01))
 
-	#plotagem
-	plt.plot(cdf_quant, cdf_cum, 'r--', linewidth=2.0)
-	plt.plot(cdf_fitted, label=dist_name+rep_err)
+	#ploting
+	plt.plot(cdf_quant, cdf_cum, 'r--', linewidth=2.0, label="empirical")
+	plt.plot(quantisCdf,np.arange(0,1,0.01), label='Distrib: '+dist_name+rep_err)
 	plt.legend(loc='lower right')
-	plt.xlim(min(y), max(y))
+	plt.xlim(min(y), max(quantisCdf))
 	plt.savefig(outputfolder + '/' + dist_name + '.png')
 	plt.clf()
 	plt.cla()
 	plt.close()
 
-	#save parameters data and goodness
-	np.savetxt(outputfolder + '/param_' + dist_name + '.txt', param, delimiter=',')
-	#save cdf
+	#save parameters data and goodness (the two last parameters are position and scale, the other are dist. parameters)
+	np.savetxt(outputfolder + '/parameters_' + dist_name + '.txt', param, delimiter=',')
+	#saving data to allow Cdf plotting in other programs
 	np.savetxt(outputfolder + '/synthdata_' + dist_name + '.csv', quantisCdf, delimiter=',')
