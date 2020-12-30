@@ -24,11 +24,6 @@ The parameters (parameters_*).
 The two last parameters are related to curve position and scale.
 The remaining parameters are related to distribution parameters
 
-<b>General description</b>
-def rmse(emp,fitted, minval, maxval): calculates RMSE
-def errores(arr1,arr2,dst_name,pop_size): calculate Kolmogorov-smirnov
-dist_names: list of distributions. You can remove the ones you do not want
-
 <b>Goodness</b>
 The script outputs RMSE and Kolmogorov-Smirnov (KS). If you use RMSE, you must choose the dist. with the smallest value. However, there are cases where the curve has a good visual fit but high RMSE. It happens because some distributions overestimates the last percentile value. Therefore you may use the value up to 95% (curve body) or the weighted RMSE, which reduces the weight of the curve tail in RMSE calculation.
 
@@ -37,5 +32,3 @@ You can use KS instead. In this case you also must choose the smallest one. Howe
 If you have problems with p-values even in distributions with a good visual fit, you can try to change the test sample sizer in lines 52 and 53 (second parameter):
 smp_emp = np.random.choice(emp_d,50,replace = False)
 smp_theo = np.random.choice(theo_d,50,replace = False)
-
-You can use 20, 100, 500 or 1000 for example. It depends on your number of instances.
