@@ -15,11 +15,11 @@ python -W ignore fitter.py [csv_data] [output_folder] [column_header];</p>
 python -W ignore fitter.py dataset.csv results data;</p>
 
 <b>The script outputs</b>
-A png for each distribution
-CDF percentiles (synthdata_*) to plot in other program languages
-The parameters (parameters_*).
-The two last parameters are related to curve position and scale.
-The remaining parameters are related to distribution parameters
+<ul>
+<li>A png for each distribution
+<li>CDF percentiles (synthdata_*) to plot in other program languages
+<li>The distribution parameters (parameters_*). The two last parameters are related to curve position and scale. The remaining parameters are related to distribution parameters
+</ul>
 
 <b>Goodness</b>
 The script outputs RMSE and Kolmogorov-Smirnov (KS). If you use RMSE, you must choose the dist. with the smallest value. However, there are cases where the curve has a good visual fit but high RMSE. It happens because some distributions overestimates the last percentile value. Therefore you may use the value up to 95% (curve body) or the weighted RMSE, which reduces the weight of the curve tail in RMSE calculation.
