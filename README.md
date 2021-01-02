@@ -8,11 +8,11 @@
   <li> RMSE error measurement for the entire curve and Weighted between curve body and tail</li>
 </ul>
 
-<b>How to call</b>
-python -W ignore fitter.py [csv_data] [output_folder] [column_header];
+<p><b>How to call</b><br />
+python -W ignore fitter.py [csv_data] [output_folder] [column_header];</p>
 
-E.g:
-python -W ignore fitter.py dataset.csv results data;
+<p>E.g:<br />
+python -W ignore fitter.py dataset.csv results data;</p>
 
 <b>The script outputs</b>
 A png for each distribution
