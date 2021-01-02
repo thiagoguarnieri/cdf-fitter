@@ -8,7 +8,7 @@
   <li> RMSE error measurement for the entire curve and Weighted between curve body and tail</li>
 </ul>
 
-<h1>How to call<h1>
+<h1>How to call</h1>
 python -W ignore fitter.py [csv_data] [output_folder] [column_header];</p>
 
 <p>E.g: Assuming you have a <i>dataset.csv</i> and wants to store in a folder called <i>results</i>:<br />
@@ -22,7 +22,7 @@ python -W ignore fitter.py dataset.csv results data;</p>
 <li>The distribution parameters (parameters_*). The two last parameters are related to curve position and scale. The remaining parameters are related to distribution parameters
 </ul>
 
-<h1>Goodness<h1>
+<h1>Goodness</h1>
 <p>The script outputs RMSE and Kolmogorov-Smirnov (KS). If you use RMSE, you must choose the dist. with the smallest value. However, there are cases where the curve has a good visual fit but high RMSE. It happens because some distributions overestimates the last percentile value. Therefore you may use the value up to 95% (curve body) or the weighted RMSE, which reduces the weight of the curve tail in RMSE calculation.</p>
 
 <p>You can use KS instead. In this case you also must choose the smallest one. However, p-value must be above 0.05. P-value indicates if empirical and test samples are from the same theoretical distribution. If you encounter two distributions with similar KS values, then you can look to RMSE to decide which one you will pick. In fact, a good RMSE depends on your application. There are cases where curve tail does not matter and there are cases where making mistakes for values in the tail have a high impact in your system.</p>
