@@ -28,5 +28,5 @@ python -W ignore fitter.py dataset.csv results data;</p>
 <p>You can use KS instead. In this case you also must choose the smallest one. However, p-value must be above 0.05. P-value indicates if empirical and test samples are from the same theoretical distribution. If you encounter two distributions with similar KS values, then you can look to RMSE to decide which one you will pick. In fact, a good RMSE depends on your application. There are cases where curve tail does not matter and there are cases where making mistakes for values in the tail have a high impact in your system.</p>
 
 <p>If you have problems with p-values even in distributions with a good visual fit, you can try to change the test sample sizer in lines 52 and 53 (second parameter):<br/>
-smp_emp = np.random.choice(emp_d,50,replace = False)
+smp_emp = np.random.choice(emp_d,50,replace = False)<br/>
 smp_theo = np.random.choice(theo_d,50,replace = False)</p>
