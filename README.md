@@ -1,15 +1,12 @@
 # Cummulative Distribuition Function Fitter
-Python script based on the scipy-stats library to fit an empirical distribution to an theorical statistical distribution.
-<br />
-It receives a CSV dataset with continuous and discrete data and find the parameters for more than 90 distributions. For each distribution, the script also employs
+<p>Python script based on the scipy-stats library to fit an empirical distribution to an theorical statistical distribution.</p>
 
+<p>It receives a CSV dataset with continuous and discrete data and find the parameters for more than 90 distributions. For each distribution, the script also employs</p>
 
 <ul>
   <li> Kolmogorov-Smirnov and Anderson-Darling adherence tests</li>
   <li> RMSE error measurement for the entire curve and Weighted between curve body and tail</li>
 </ul>
- 
-Examples to run are provided in the documentation
 
 <b>How to call</b>
 python -W ignore fitter.py [csv_data] [output_folder] [column_header];
